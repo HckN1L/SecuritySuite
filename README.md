@@ -1,11 +1,11 @@
 Security Suite - Offensive & Defensive Web Tools
 
-A web-based suite of security tools, featuring a phishing URL analyzer (PhishGuard) and an advanced reverse shell generator (ShellGen). This project combines a professional, hacker-themed UI with practical, self-contained security utilities.
+A web-based suite of security tools, featuring a phishing URL analyzer and an advanced reverse shell generator. This project combines a professional, hacker-themed UI with practical, self-contained security utilities.
 🚀 Live Demo
 
 You can view the live frontend of the website here:
 
-https://hckn1l.github.io/PhishGuard/
+https://hckn1l.github.io/SecuritySuite/
 
     Note: The live demo showcases the full user interface for both tools.
 
@@ -24,7 +24,7 @@ https://hckn1l.github.io/PhishGuard/
     Responsive Design: The interface is designed to work smoothly on all devices.
 
 🛠️ Tools Included
-🛡️ PhishGuard (Defense)
+🛡️ Phishing URL Analyzer (Defense)
 
 A powerful scanner to analyze and detect phishing & malicious URLs.
 
@@ -34,7 +34,7 @@ A powerful scanner to analyze and detect phishing & malicious URLs.
 
     No API Keys Needed: Works entirely offline for privacy and ease of use.
 
-⚔️ ShellGen (Attacker)
+⚔️ Advanced Reverse Shell Generator (Attacker)
 
 An advanced generator for creating one-line reverse shells.
 
@@ -48,7 +48,7 @@ An advanced generator for creating one-line reverse shells.
 
 ⚙️ How to Run the Full Application Locally
 
-To use the PhishGuard URL scanning functionality, you need to run the Python backend on your computer.
+To use the Phishing URL scanning functionality, you need to run the Python backend on your computer.
 Prerequisites
 
     Python 3.x installed on your system.
@@ -57,8 +57,8 @@ Prerequisites
 
 1. Clone the Repository
 
-git clone https://github.com/HckN1L/PhishGuard.git
-cd PhishGuard
+git clone https://github.com/HckN1L/SecuritySuite.git
+cd SecuritySuite
 
 2. Install Dependencies
 
@@ -75,7 +75,7 @@ python app.py
 This will start the server on your local machine. Keep this terminal window open.
 4. Use the Live Site
 
-Now, open the live website: https://hckn1l.github.io/PhishGuard/. With the backend running on your machine, the PhishGuard scanner will now work as intended.
+Now, open the live website: https://hckn1l.github.io/SecuritySuite/. With the backend running on your machine, the PhishGuard scanner will now work as intended.
 ❤️ Credits
 
 This project was created and designed by @HckN1L.
