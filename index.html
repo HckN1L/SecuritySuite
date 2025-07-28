@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishGuard - Professional URL Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            overflow: hidden; /* Hide scrollbars from the body */
+        }
+
+        /* --- Animated Particle Background --- */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            background-color: #0a0a0a;
+        }
+
+        /* --- Main Content Container --- */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        /* --- Glassmorphism Effect --- */
+        .glass-card {
+            background: rgba(17, 24, 39, 0.6); /* Semi-transparent dark background */
+            backdrop-filter: blur(12px); /* The magic blur effect */
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- Custom Loader --- */
+        .modern-loader {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #3b82f6; /* Blue accent */
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- Smooth Transitions --- */
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Particle background container -->
+    <div id="particles-js"></div>
+
+    <div class="main-content">
+        <div class="w-full max-w-2xl mx-auto">
+            <header class="text-center mb-8">
+                <h1 class="text-5xl md:text-6xl font-black text-white mb-3 tracking-tighter">PhishGuard</h1>
+                <p class="text-lg text-gray-400">Your intelligent shield against phishing attacks.</p>
+            </header>
+
+            <!-- Input Card -->
+            <div class="glass-card p-6 md:p-8 mb-8">
+                <form id="url-form">
+                    <label for="url-input" class="block text-sm font-medium text-gray-300 mb-3">Enter a URL to scan</label>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input type="url" id="url-input" placeholder="https://example.com" required
+                               class="flex-grow bg-gray-900/70 border-2 border-gray-600 text-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/50 focus:border-blue-500 block w-full p-4 transition duration-300 placeholder-gray-500">
+                        <button type="submit" id="scan-button"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center transform hover:scale-105 shadow-lg shadow-blue-500/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            <span>Scan URL</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-container" class="space-y-6">
+                <div id="loader" class="hidden flex-col items-center justify-center p-8">
+                    <div class="modern-loader"></div>
+                    <p class="mt-4 text-gray-400">Analyzing URL... Please wait.</p>
+                </div>
+                
+                <div id="error-box" class="hidden glass-card fade-in-up bg-red-500/20 border-red-500/50 text-red-300 px-6 py-4" role="alert">
+                    <div class="flex"><div class="py-1"><svg class="h-6 w-6 text-red-400 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><strong class="font-bold">Error:</strong><span class="block sm:inline" id="error-message"></span></div></div>
+                </div>
+
+                <div id="result-card" class="hidden glass-card fade-in-up overflow-hidden">
+                    <div id="result-header" class="p-5 border-b flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-white" id="status-text"></h2>
+                        <button id="copy-button" class="text-gray-400 hover:text-white transition-colors" title="Copy Analysis">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        </button>
+                    </div>
+                    <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
+                        <div class="md:col-span-2 flex flex-col items-center justify-center p-4 rounded-lg">
+                            <div id="score-circle" class="relative w-36 h-36 rounded-full flex items-center justify-center text-5xl font-bold transition-colors duration-500"><span id="score-value"></span></div>
+                            <p class="text-sm text-gray-400 mt-3">Risk Score</p>
+                        </div>
+                        <div class="md:col-span-3 space-y-5">
+                            <div>
+                                <h3 class="font-semibold text-lg text-gray-300 mb-2 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 6a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2v-4a2 2 0 00-2-2H4z" clip-rule="evenodd" /></svg>Analysis Breakdown</h3>
+                                <ul id="analysis-list" class="space-y-2 list-inside text-gray-400"></ul>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg text-gray-300 mb-1 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Recommendation</h3>
+                                <p class="text-gray-400" id="recommendation-text"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="absolute bottom-4 text-center text-gray-500 text-sm">
+            Created with ❤️ by <a href="https://x.com/HckN1L" target="_blank" class="font-semibold text-gray-400 hover:text-blue-400 transition-colors">@HckN1L</a>
+        </footer>
+    </div>
+
+    <!-- Particles.js Library -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {"particles":{"number":{"value":80,"density":{"enable":true,"value_area":800}},"color":{"value":"#ffffff"},"shape":{"type":"circle"},"opacity":{"value":0.5,"random":false},"size":{"value":3,"random":true},"line_linked":{"enable":true,"distance":150,"color":"#ffffff","opacity":0.4,"width":1},"move":{"enable":true,"speed":6,"direction":"none","random":false,"straight":false,"out_mode":"out","bounce":false}},"interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"repulse"},"onclick":{"enable":true,"mode":"push"},"resize":true},"modes":{"repulse":{"distance":100,"duration":0.4},"push":{"particles_nb":4}}},"retina_detect":true});
+
+        const urlForm = document.getElementById('url-form');
+        const urlInput = document.getElementById('url-input');
+        const scanButton = document.getElementById('scan-button');
+        const loader = document.getElementById('loader');
+        const resultCard = document.getElementById('result-card');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+        const statusText = document.getElementById('status-text');
+        const scoreCircle = document.getElementById('score-circle');
+        const scoreValue = document.getElementById('score-value');
+        const analysisList = document.getElementById('analysis-list');
+        const recommendationText = document.getElementById('recommendation-text');
+        const resultHeader = document.getElementById('result-header');
+        const copyButton = document.getElementById('copy-button');
+
+        urlForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = urlInput.value.trim();
+            if (!url) { displayError("URL input cannot be empty."); return; }
+            hideResults();
+            hideError();
+            loader.style.display = 'flex';
+            scanButton.disabled = true;
+            scanButton.classList.add('opacity-50', 'cursor-not-allowed');
+            try {
+                const analysisResult = await analyzeUrlWithBackend(url);
+                displayResults(analysisResult);
+            } catch (error) {
+                console.error("Backend Call Failed:", error);
+                displayError("Failed to connect to the local analysis server. Is the Python script running?");
+            } finally {
+                loader.style.display = 'none';
+                scanButton.disabled = false;
+                scanButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        copyButton.addEventListener('click', () => {
+            const textToCopy = `Status: ${statusText.textContent}\nScore: ${scoreValue.textContent}\nAnalysis:\n- ${[...analysisList.children].map(li => li.textContent).join('\n- ')}\n\nRecommendation: ${recommendationText.textContent}`;
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            // Visual feedback
+            copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+            setTimeout(() => {
+                copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>';
+            }, 2000);
+        });
+
+        async function analyzeUrlWithBackend(url) {
+            const backendUrl = 'http://127.0.0.1:5000/scan';
+            const response = await fetch(backendUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: url }) });
+            if (!response.ok) { throw new Error(`Backend request failed with status ${response.status}`); }
+            const result = await response.json();
+            if (result.candidates && result.candidates.length > 0) { return JSON.parse(result.candidates[0].content.parts[0].text); } 
+            else { throw new Error("The backend returned an empty or invalid response."); }
+        }
+
+        function displayResults(data) {
+            statusText.textContent = data.status;
+            scoreValue.textContent = Math.round(data.score);
+            recommendationText.textContent = data.recommendation;
+            
+            // Clear previous analysis points and create a list
+            analysisList.innerHTML = '';
+            const points = data.analysis_points || [data.analysis]; // Fallback for old format
+            points.forEach(point => {
+                const li = document.createElement('li');
+                li.textContent = point;
+                li.className = 'flex items-start';
+                const icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>';
+                li.innerHTML = icon + point;
+                analysisList.appendChild(li);
+            });
+
+            const statusClasses = getStatusClasses(data.status);
+            resultHeader.className = `p-5 border-b flex justify-between items-center ${statusClasses.borderColor}`;
+            scoreCircle.className = `relative w-36 h-36 rounded-full flex items-center justify-center text-5xl font-bold transition-colors duration-500 ${statusClasses.textColor} ${statusClasses.scoreBg}`;
+            
+            resultCard.style.display = 'block';
+        }
+
+        function hideResults() { resultCard.style.display = 'none'; }
+        function displayError(message) { errorMessage.textContent = message; errorBox.style.display = 'block'; }
+        function hideError() { errorBox.style.display = 'none'; }
+
+        function getStatusClasses(status) {
+            switch (status.toLowerCase()) {
+                case 'safe': return { borderColor: 'border-green-500/50', textColor: 'text-green-400', scoreBg: 'bg-green-500/10' };
+                case 'suspicious': return { borderColor: 'border-yellow-500/50', textColor: 'text-yellow-400', scoreBg: 'bg-yellow-500/10' };
+                case 'malicious': return { borderColor: 'border-red-500/50', textColor: 'text-red-400', scoreBg: 'bg-red-500/10' };
+                default: return { borderColor: 'border-gray-600', textColor: 'text-gray-400', scoreBg: 'bg-gray-700/20' };
+            }
+        }
+    </script>
+</body>
+</html>
