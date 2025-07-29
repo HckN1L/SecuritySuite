@@ -1,130 +1,141 @@
-# app.py
-# ---
-# This is a simple backend server using Flask.
-# It now uses a LOCAL function to analyze URLs, requiring NO API KEY.
-# This makes the project fully self-contained for presentations.
-
 import re
+import socket
+import requests
+from urllib.parse import urlparse
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-# Initialize the Flask app
 app = Flask(__name__)
-# Enable CORS to allow the HTML page to make requests to this server
 CORS(app)
 
 
 def analyze_url_locally(url):
     """
-    Analyzes a URL based on a set of simple, local rules without needing an external API.
-    Returns a dictionary with status, score, analysis, and recommendation.
+    Analyzes a URL using a professional-grade, local rule-based engine.
+    This includes real-time checks for domain existence and website liveness.
     """
     score = 0
     analysis_points = []
 
-    # --- Rule-Based Analysis ---
+    try:
+        if not re.match(r'^(?:http|ftp)s?://', url):
+            url = 'https://' + url
+        parsed_url = urlparse(url)
+        domain = parsed_url.netloc
+        if not domain or '.' not in domain and domain.lower() != 'localhost':
+            raise ValueError("The domain structure is invalid.")
+        path = parsed_url.path
+    except ValueError as e:
+        return {
+            "status": "Invalid URL", "score": 100,
+            "analysis_points": [f"URL format is invalid: {e}"],
+            "recommendation": "Please enter a valid URL (e.g., example.com)."
+        }
 
-    # Rule 1: Check for HTTPS. Lack of HTTPS is a major red flag.
-    if not url.startswith("https://"):
+    try:
+        ip_address = socket.gethostbyname(domain)
+        analysis_points.append(f"OK: Domain '{domain}' resolves to IP {ip_address}.")
+        
+        try:
+            response = requests.head(url, timeout=3, allow_redirects=True)
+            if response.status_code < 400:
+                analysis_points.append(f"OK: Website is live and responding (Status: {response.status_code}).")
+            else:
+                score += 10
+                analysis_points.append(f"Warning: Website returned an error status (Code: {response.status_code}).")
+        except requests.exceptions.RequestException:
+            score += 25
+            analysis_points.append("High Risk: Domain exists but the website is not responding or unreachable.")
+
+    except socket.gaierror:
+        return {
+            "status": "Domain Not Found", "score": 100,
+            "analysis_points": ["Critical Risk: This domain does not appear to exist."],
+            "recommendation": "The domain is not registered. This could be a typo or the site is offline. Do not proceed."
+        }
+
+    if parsed_url.scheme != "https":
         score += 25
-        analysis_points.append("URL is not secure (does not use HTTPS).")
-    else:
-        analysis_points.append("URL uses secure HTTPS.")
+        analysis_points.append("High Risk: Connection is not secure (lacks HTTPS).")
 
-    # Rule 2: Check for suspicious keywords often used in phishing.
-    suspicious_keywords = ["login", "secure", "account", "update", "verify", "signin", "password"]
-    if any(keyword in url.lower() for keyword in suspicious_keywords):
-        score += 20
-        analysis_points.append("Contains potentially suspicious keywords (e.g., 'login', 'secure').")
-
-    # Rule 3: Check if the URL uses an IP address instead of a domain name.
-    # This is a very strong indicator of a malicious site.
-    domain_part = url.split('//')[1].split('/')[0]
-    if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", domain_part):
+    if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", domain):
         score += 40
-        analysis_points.append("URL is an IP address, which is highly suspicious.")
+        analysis_points.append("Critical Risk: Website uses a direct IP address, a common tactic for malicious sites.")
 
-    # Rule 4: Check for unusually long URLs.
-    if len(url) > 75:
-        score += 10
-        analysis_points.append("URL is unusually long, which can be used to hide the true domain.")
+    shorteners = ['bit.ly', 't.co', 'goo.gl', 'tinyurl.com']
+    if any(shortener in domain for shortener in shorteners):
+        score += 25
+        analysis_points.append("High Risk: URL uses a link shortener, which hides the final destination.")
 
-    # Rule 5: Check for multiple hyphens, a common obfuscation technique.
-    if domain_part.count('-') > 2:
+    keywords = ["login", "secure", "account", "update", "verify", "signin", "password", "banking", "confirm", "support"]
+    if any(keyword in (domain + path).lower() for keyword in keywords):
         score += 15
-        analysis_points.append("URL contains multiple hyphens, which is uncommon for legitimate sites.")
+        analysis_points.append("Warning: URL contains potentially suspicious keywords.")
 
-    # --- Final Verdict ---
+    brands = ["google", "paypal", "facebook", "amazon", "microsoft", "apple", "netflix"]
+    domain_parts = domain.lower().split('.')
+    for brand in brands:
+        if brand in domain_parts and brand != domain_parts[-2]:
+            score += 30
+            analysis_points.append(f"Critical Risk: Potential brand impersonation of '{brand.title()}'.")
+            break
 
-    # Cap the score at 100
+    if domain.count('.') > 3:
+        score += 15
+        analysis_points.append("Warning: URL has an excessive number of subdomains.")
+
+    suspicious_tlds = ['.xyz', '.top', '.link', '.click', '.buzz', '.live', '.fit', '.gq', '.work', '.loan']
+    if any(domain.endswith(tld) for tld in suspicious_tlds):
+        score += 20
+        analysis_points.append(f"High Risk: The Top-Level Domain is often associated with malicious sites.")
+
+    malicious_ext = ['.exe', '.zip', '.rar', '.js', '.vbs', '.scr', '.msi']
+    if any(path.lower().endswith(ext) for ext in malicious_ext):
+        score += 35
+        analysis_points.append("Critical Risk: URL path points directly to a potentially malicious file download.")
+
     score = min(score, 100)
-
-    # Determine the final status and recommendation based on the score
-    if score >= 65:
+    
+    if score >= 70:
         status = "Malicious"
-        recommendation = "This URL has several strong indicators of being malicious. Do not visit this site or enter any information."
-    elif score >= 35:
+        recommendation = "This URL has several critical indicators of being malicious. Do not visit this site or enter any information."
+    elif score >= 40:
         status = "Suspicious"
-        recommendation = "This URL has some suspicious characteristics. Proceed with extreme caution and do not provide personal data."
+        recommendation = "This URL has multiple suspicious characteristics. Proceed with extreme caution."
+    elif score >= 20:
+        status = "Potentially Unsafe"
+        recommendation = "This URL has some low-risk warnings. Be vigilant and do not provide sensitive data."
     else:
-        status = "Safe"
-        recommendation = "This URL appears to be safe based on basic checks, but always remain vigilant."
+        status = "Likely Safe"
+        recommendation = "This URL appears to be safe based on our checks, but always exercise caution."
 
-    # Override for well-known safe domains to reduce false positives
-    safe_domains = ["google.com", "youtube.com", "facebook.com", "amazon.com", "microsoft.com", "apple.com"]
-    if any(safe_domain in domain_part for safe_domain in safe_domains):
+    safe_domains = ["google.com", "youtube.com", "facebook.com", "amazon.com", "microsoft.com", "apple.com", "github.com", "x.com"]
+    if any(domain.endswith(safe) for safe in safe_domains) and score < 70:
         score = 5
         status = "Safe"
-        analysis_points = ["URL belongs to a well-known and trusted domain."]
+        analysis_points = [f"OK: URL belongs to the trusted domain '{domain}'."]
         recommendation = "This URL belongs to a trusted domain and is considered safe to proceed."
 
-    analysis_summary = " ".join(analysis_points)
-
-    # This dictionary has the same structure the frontend expects
     return {
         "status": status,
         "score": score,
-        "analysis": analysis_summary,
+        "analysis_points": analysis_points,
         "recommendation": recommendation
     }
 
 
 @app.route('/scan', methods=['POST'])
 def scan_url():
-    """
-    This function handles the /scan request from the frontend.
-    It now calls the local analysis function instead of an external API.
-    """
     data = request.get_json()
     if not data or 'url' not in data:
         return jsonify({"error": "URL not provided"}), 400
-    
     url_to_scan = data['url']
-    
-    # Get the analysis result from our local function
     result = analyze_url_locally(url_to_scan)
-    
-    # The frontend expects the result inside a 'candidates' list,
-    # so we will simulate that structure.
     simulated_api_response = {
-        "candidates": [
-            {
-                "content": {
-                    "parts": [
-                        {
-                            # The result must be a JSON string, so we convert the dictionary to a string
-                            "text": jsonify(result).get_data(as_text=True)
-                        }
-                    ]
-                }
-            }
-        ]
+        "candidates": [{"content": {"parts": [{"text": jsonify(result).get_data(as_text=True)}]}}]
     }
-    
     return jsonify(simulated_api_response)
 
 
-# This allows the script to be run directly
 if __name__ == '__main__':
-    # Runs the Flask server on http://127.0.0.1:5000
     app.run(port=5000, debug=True)
